@@ -13,3 +13,7 @@ Currently just a tokenizer test. Run `lang.py` and give it a program as input, a
 `0q11`: quaternary  
 `0x11`: hexadecimal
 `[1 2 3]`: list. Can be nested like `[1 2 3 [4 5 6]]`. Try `[1[2[3[4]5]6]7]` :D  
+`ßcode»`: sort over a key function. If top-of-stack is a list, sort that; otherwise, sort the whole stack  
+`£code»`: map over a key function. If top-of-stack is a list, map that; otherwise, map the whole stack  
+`þcode»`: filter over a key function. If top-of-stack is a list, filter that; otherwise, filter the whole stack  
+`ʠcode»`: filter out over a key function. If top-of-stack is a list, filter out that; otherwise, apply on the whole stack  

@@ -3,6 +3,13 @@ code_page += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲ
 escapemap  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`a\bcdefghijklm\nopq\rs\tuvwxyz{|}~¶'''
 escapemap += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
 
+codeblock_tokens = {
+    'ß': 'SortToken',
+    '£': 'MapToken',
+    'þ': 'FilterToken',
+    'ʠ': 'FilterOutToken'
+}
+
 def escape(char):
     return escapemap[code_page.find(char)]
 
@@ -96,13 +103,14 @@ class Tokenizer():
                 array.append(self.next())
             self.advance()
             return Token('ListToken', array)
-        elif self.current() == 'Þ':
+        elif self.current() in codeblock_tokens:
+            codeblock_type = self.current()
             array = []
             self.advance()
             while self.hasNext() and self.current() != '»':
                 array.append(self.next())
             self.advance()
-            return Token('SortToken', array)
+            return Token(codeblock_tokens[codeblock_type], array)
         return Token('InstructionToken', self.code[self.advance()])
 
 instruction_queue = []
