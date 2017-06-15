@@ -69,10 +69,10 @@ class Tokenizer():
         elif self.current() in '0123456789.':
             decimal = self.current() == '.'
             base = 10
-            bases = ' ubtqphs n UdTQPxSONM'
+            bases = ' bq x'
             if self.code[self.advance()] == '0':
                 if self.hasNext():
-                    if self.current() != ' ' and self.current() in bases: base = bases.find(self.current())
+                    if self.current() != ' ' and self.current() in bases: base = 2 ** bases.find(self.current())
                     elif self.current() in '0123456789': base = 8
                     elif self.current() == '.': base = 10
                 else: return Token('NumberToken', 0)
