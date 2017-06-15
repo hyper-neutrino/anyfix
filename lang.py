@@ -388,4 +388,6 @@ code = input()
 
 tokenizer = Tokenizer(code)
 while tokenizer.hasNext():
-    print(tokenizer.next())
+    token = tokenizer.next()
+    instruction_queue.append(token)
+print(instruction_queue)
