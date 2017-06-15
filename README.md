@@ -4,8 +4,9 @@ Currently just a tokenizer test. Run `lang.py` and give it a program as input, a
 
 # syntax
 
-`"string"`: string of arbitrary length. `\k` for any character `k` currently returns `k`; changes will be made later.  
-`'c`: string of length `1`. `'\k` still works, still giving `k` though.  
+`“string”`: string of arbitrary length. `\k` for any character `k` currently returns `k` for most `k`; changes will be made later.  
+`“string1“string2“string3”`: list of strings of arbitrary length, of arbitrary length. String syntax still applies
+`”c`: string of length `1`. `'\k` still works, still giving `k` though.  
 `123`: number  
 `0123`: octal  
 `0b11`: binary  
