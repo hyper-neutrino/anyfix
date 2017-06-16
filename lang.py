@@ -209,6 +209,15 @@ class Interpreter():
                 arguments = self.popAll()
                 self.push(function(*arguments))
                 self.update()
+            elif arity == -2:
+                debug('( Operates over list )')
+                function = functions.functions[token.content]
+                if hasattr(self.peek(), '__iter__'):
+                    self.push(function(self.pop()))
+                    self.update()
+                else:
+                    self.push(function(*self.popAll()))
+                    self.update()
             elif len(self.mem) >= arity:
                 debug('( Enough items on stack )')
                 function = functions.functions[token.content]
