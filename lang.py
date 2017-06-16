@@ -1,5 +1,5 @@
 from core import *
-import arities, functions
+import arities, functions, sys
 
 code_page  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¶'''
 code_page += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
@@ -12,6 +12,29 @@ codeblock_tokens = {
     'þ': 'BlockFilterToken',
     'ʠ': 'BlockFilterOutToken',
     '/': 'BlockReduceToken'
+}
+
+extenders = ['Æ', 'Œ', 'æ', 'œ']
+
+bracket_closers = {
+    '[': ']',
+    '<': '>',
+    '{': '}',
+    '(': ')'
+}
+
+multitokens = {
+    '[': 'MultivalueListToken',
+    '<': 'MultivalueTupleToken',
+    '{': 'MultivalueSetToken',
+    '(': 'MultivalueSplatToken'
+}
+
+multivalue_converters = {
+    'MultivalueListToken': list,
+    'MultivalueTupleToken': tuple,
+    'MultivalueSetToken': set,
+    'MultivalueSplatToken': splat
 }
 
 def debug(text):
@@ -45,8 +68,8 @@ class Token():
         return self.__str__()
     def isLiteral(self):
         return self.type.startswith('Literal')
-    def isList(self):
-        return self.type.startswith('List')
+    def isMultivalue(self):
+        return self.type.startswith('Multivalue')
     def isBlock(self):
         return self.type.startswith('Block')
     def isInstruction(self):
@@ -70,10 +93,17 @@ class Tokenizer():
         return self.index - 1
     def current(self):
         return self.code[self.index]
+    def take(self):
+        self.next()
+        token = self.tokens[-1]
+        self.tokens = self.tokens[:-1]
+        return token
     def next(self):
+        debug('( Now on $%s$ )' % self.current())
         if self.current() == ' ':
             self.advance()
-            self.tokens.append(self.next() if self.hasNext() else Token('EOFToken', ''))
+            debug('( Tokenskip )')
+            self.next()
         elif self.current() == '“':
             self.advance()
             strings = ['']
@@ -88,7 +118,7 @@ class Tokenizer():
                         strings[-1] += self.current()
                 self.advance()
             self.advance()
-            self.tokens.append(Token('LiteralStringToken', strings[0]) if len(strings) == 1 else Token('ListToken', [Token('LiteralStringToken', string) for string in strings]))
+            self.tokens.append(Token('LiteralStringToken', strings[0]) if len(strings) == 1 else Token('MultivalueListToken', [Token('LiteralStringToken', string) for string in strings]))
         elif self.current() == '”':
             self.advance()
             if self.current() == '\\':
@@ -121,16 +151,18 @@ class Tokenizer():
                 else:
                     break
             self.tokens.append(Token('LiteralNumberToken', baseconvert(number, base)))
-        elif self.current() == '[':
+        elif self.current() in bracket_closers:
             array = []
+            opener = self.current()
+            closer = bracket_closers[opener]
             self.advance()
-            while self.hasNext() and self.current() != ']':
-                array.append(self.next())
+            while self.hasNext() and self.current() != closer:
+                array.append(self.take())
             self.advance()
-            self.tokens.append(Token('ListToken', array))
+            self.tokens.append(Token(multitokens[opener], array))
         elif self.current() in codeblock_tokens:
-            self.advance()
             self.tokens.append(Token(codeblock_tokens[self.current()], ''))
+            self.advance()
         elif self.current() == '»':
             tokenlist = []
             buffer = 0
@@ -144,7 +176,14 @@ class Tokenizer():
                 elif tokenlist[0].isBlock():
                     buffer -= 1
             self.tokens.append(Token('ComboToken', tokenlist))
-        self.tokens.append(Token('InstructionToken', self.code[self.advance()]))
+            self.advance()
+        elif self.current() in extenders:
+            extender = self.current()
+            self.advance()
+            self.tokens.append(Token('InstructionToken', extender + self.code[self.advance()]))
+        else:
+            self.tokens.append(Token('InstructionToken', self.code[self.advance()]))
+        debug('Token List: %s' % str(self.tokens))
 
 class Interpreter():
     def __init__(self, tokens):
@@ -199,20 +238,18 @@ class Interpreter():
                 self.instruction_queue = self.instruction_queue[1:]
                 self.update()
     def next(self):
-        debug('Tokens Left: %s' % str(self.tokens))
         token = self.tokens[0]
-        debug('Evaluating %s' % str(token))
         self.tokens = self.tokens[1:]
+        debug('Tokens Left: %s' % str(self.tokens))
+        debug('Evaluating %s' % str(token))
         if token.isLiteral():
             debug('( Literal token )')
             self.push(token.content)
-            self.update()
-        elif token.isList():
-            debug('( List token )')
+        elif token.isMultivalue():
+            debug('( Multivalue token )')
             tokenlist = token.content
             valuelist = Interpreter.operate(tokenlist, [])
-            self.push(valuelist)
-            self.update
+            self.push(multivalue_converters[token.type](valuelist))
         elif token.isInstruction() and all(char in code_page for char in token.content):
             debug('( Instruction Token )')
             arity = arities.arities[token.content]
@@ -222,22 +259,30 @@ class Interpreter():
                 function = functions.functions[token.content]
                 arguments = self.popAll()
                 self.push(function(*arguments))
-                self.update()
             elif arity == -2:
                 debug('( Operates over list )')
                 function = functions.functions[token.content]
-                if hasattr(self.peek(), '__iter__'):
-                    self.push(function(self.pop()))
-                    self.update()
+                if hasattr(self.peek(), '__getitem__'):
+                    top = self.pop()
+                    result = function(*top)
+                    if type(result) == type(splat([])): result = result.array
+                    if type(top) != type(result):
+                        if type(top) == type(''):
+                            result = str(result)
+                        elif type(top) == type([]):
+                            result = list(result)
+                        elif type(top) == type(tuple([])):
+                            result = tuple(result)
+                        elif type(top) == type(set([])):
+                            result = set(result)
+                    self.push(result)
                 else:
                     self.push(function(*self.popAll()))
-                    self.update()
             elif len(self.mem) >= arity:
                 debug('( Enough items on stack )')
                 function = functions.functions[token.content]
                 arguments = self.popCount(arity)
                 self.push(function(*arguments))
-                self.update()
             else:
                 debug('( Not enough items on stack; adding to queue )')
                 self.instruction_queue.append(token)
@@ -248,13 +293,13 @@ class Interpreter():
                 if listmode: self.push(array)
                 else: self.pushAll(*array)
             if token.type == 'BlockSortToken':
-                push(sorted(array, key = lambda x: Interpreter.operate([self.nextToken()], [x])))
+                push(list(sorted(array, key = lambda x: Interpreter.operate([self.nextToken()], [x]))))
             elif token.type == 'BlockMapToken':
-                push(map(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array))
+                push(list(map(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array)))
             elif token.type == 'BlockFilterToken':
-                push(filter(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array))
+                push(list(filter(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array)))
             elif token.type == 'BlockFilterOutToken':
-                push(filter(lambda x: not Interpreter.operate([self.nextToken()], [x])[0], array))
+                push(list(filter(lambda x: not Interpreter.operate([self.nextToken()], [x])[0], array)))
             elif token.type == 'BlockReduceToken':
                 f = lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0]
                 while len(array) > 1:
@@ -262,18 +307,30 @@ class Interpreter():
                     array = array[1:]
                 push(array)
             self.tokens = self.tokens[1:]
-            self.update()
         elif token.isCombo():
             self.mem = Interpreter.operate(token.content, self.mem)
-            self.update()
+        self.update()
 
-verbose = True
+verbose = '@verbose' in sys.argv
+file = '@file' in sys.argv
 
-code = input()
+code = ''
+if file:
+    with open(sys.argv[sys.argv.index('@file') + 1], 'r') as f:
+        code = f.read()
+else:
+    code = input()
 tokens = Tokenizer.tokenize(code)
 debug('TOKENS: %s' % str(tokens))
 
 interpreter = Interpreter(tokens)
+
+for index in range(1, len(sys.argv)):
+    if not sys.argv[index].startswith('@') and not (file and index == sys.argv.index('@file') + 1):
+        interpreter.mem.append(eval(argument))
+
+interpreter.mem = interpreter.mem[::-1]
+
 while interpreter.hasNext():
     interpreter.next()
 print('Memory:', interpreter.mem)

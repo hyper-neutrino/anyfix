@@ -25,15 +25,26 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 
 # commands
 `¬`: Logical inverse  
+`×`: Multiply  
+`ı`: Complex Number  
+`ȷ`: `1-from-top * 10 ** top` (exp-10)  
 `&`: Logical AND  
 `+`: Addition (Integer, String)  
 `-`: Negate (Integer)  
-`?`: Ternary: `2-from-top if top else 1-from-top`  
+`?`: Ternary: `2-from-top if top else 1-from-top`
+`B`: Integer -> Binary Digits, or String -> Characters; does nothing to multi-value things
+`D`: Integer -> Decimal Digits, or String -> Characters; does nothing to multi-value things  
+`J`: Range of Length (according to `L`)
 `L`: Length; converts numbers to strings automatically  
-`R`: Reverses the top if it is an iterable; otherwise, the whole stack  
+`O`: String -> Map to code-points, Character -> code-point, Integer -> character at that code-point  
+`R`: Range `[1..x]`  
+`U`: Reverses the top if it can be iterated over; otherwise, the whole stack  
 `_`: Subtraction; `1-from-top - top`
 `|`: Logical OR  
 `Ạ`: Python AND  
+`Ḷ`: Range `[0..x-1]`  
 `Ọ`: Python OR  
+`Ḃ`: Binary digits -> Integer  
+`Ḋ`: Decimal digits -> Integer  
 `‘`: Increment  
 `’`: Decrement  
