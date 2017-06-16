@@ -21,6 +21,8 @@ Currently just a tokenizer test. Run `lang.py` and give it a program as input, a
 `ʠcode»`: filter out over a key function. If top-of-stack is a list, filter out that; otherwise, apply on the whole stack  
 `/code»`: reduce over a key (dyadic) function.
 
+Codeblocks do not need the trailing '»'; that's only required for if `code` contains more than one token.  
+
 # commands
 `¬`: Logical inverse  
 `&`: Logical AND  
