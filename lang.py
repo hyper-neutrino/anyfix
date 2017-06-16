@@ -1,14 +1,22 @@
+from core import *
+import arities, functions
+
 code_page  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¶'''
 code_page += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
 escapemap  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`a\bcdefghijklm\nopq\rs\tuvwxyz{|}~¶'''
 escapemap += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
 
 codeblock_tokens = {
-    'ß': 'SortToken',
-    '£': 'MapToken',
-    'þ': 'FilterToken',
-    'ʠ': 'FilterOutToken'
+    'ß': 'BlockSortToken',
+    '€': 'BlockMapToken',
+    'þ': 'BlockFilterToken',
+    'ʠ': 'BlockFilterOutToken',
+    '/': 'BlockReduceToken'
 }
+
+def debug(text):
+    if verbose:
+        print(text)
 
 def escape(char):
     return escapemap[code_page.find(char)]
@@ -17,13 +25,14 @@ def unescape(char):
     return '\\' + code_page[escapemap.find(char)]
 
 def unescapify(string):
-    return ''.join([char if char in code_page else unescape(char) for char in string])
+    return string if type(string) != type('') else ''.join([char if char in code_page else unescape(char) for char in string])
 
 def baseconvert(string, base):
     if '.' in string:
-        left = len(string.split('.')[0]) if base == 1 else int(string.split('.')[0], base)
+        left = string.split('.')[0]
+        left = len(left) if base == 1 else len(left) and int(left, base)
         right = string.split('.')[1]
-        return left + (len(right) if base == 1 else int(right, base)) / base ** len(right)
+        return left + (len(right) if base == 1 else len(right) and int(right, base)) / base ** len(right)
     return int(string, base)
 
 class Token():
@@ -34,11 +43,24 @@ class Token():
         return '%s@[%s]' % (self.type, unescapify(self.content))
     def __repr__(self):
         return self.__str__()
+    def isLiteral(self):
+        return self.type.startswith('Literal')
+    def isList(self):
+        return self.type.startswith('List')
+    def isBlock(self):
+        return self.type.startswith('Block')
+    def isInstruction(self):
+        return self.type.startswith('Instruction')
 
 class Tokenizer():
     def __init__(self, code):
         self.code = code.strip()
         self.index = 0
+    def tokenize(code):
+        tokenizer = Tokenizer(code)
+        tokens = []
+        while tokenizer.hasNext(): tokens.append(tokenizer.next())
+        return tokens
     def hasNext(self):
         return self.index < len(self.code)
     def advance(self):
@@ -64,17 +86,17 @@ class Tokenizer():
                         strings[-1] += self.current()
                 self.advance()
             self.advance()
-            return Token('StringToken', strings[0]) if len(strings) == 1 else Token('ListToken', [Token('StringToken', string) for string in strings])
+            return Token('LiteralStringToken', strings[0]) if len(strings) == 1 else Token('ListToken', [Token('LiteralStringToken', string) for string in strings])
         elif self.current() == '”':
             self.advance()
             if self.current() == '\\':
                 self.advance()
-                return Token('StringToken', escape(self.code[self.advance()]))
+                return Token('LiteralStringToken', escape(self.code[self.advance()]))
             else:
                 self.advance()
-                return Token('StringToken', self.current())
+                return Token('LiteralStringToken', self.current())
         elif self.current() in '0123456789.':
-            decimal = self.current() == '.'
+            decimal = False
             base = 10
             bases = ' bq x'
             if self.code[self.advance()] == '0':
@@ -82,7 +104,7 @@ class Tokenizer():
                     if self.current() != ' ' and self.current() in bases: base = 2 ** bases.find(self.current())
                     elif self.current() in '0123456789': base = 8
                     elif self.current() == '.': base = 10
-                else: return Token('NumberToken', 0)
+                else: return Token('LiteralNumberToken', 0)
             number = ''
             if base == 10:
                 self.index -= 1
@@ -95,7 +117,7 @@ class Tokenizer():
                     self.advance()
                 else:
                     break
-            return Token('NumberToken', baseconvert(number, base))
+            return Token('LiteralNumberToken', baseconvert(number, base))
         elif self.current() == '[':
             array = []
             self.advance()
@@ -113,13 +135,118 @@ class Tokenizer():
             return Token(codeblock_tokens[codeblock_type], array)
         return Token('InstructionToken', self.code[self.advance()])
 
-instruction_queue = []
-value_stack = []
+class Interpreter():
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.instruction_queue = []
+        self.mem = []
+    def operate(tokens, mem):
+        debug('( Operating on %s )' % str(tokens))
+        interpreter = Interpreter(tokens)
+        interpreter.mem = mem
+        debug('( Interpreter initialized with mem %s and tokens %s )' % (str(interpreter.mem), str(interpreter.tokens)))
+        while interpreter.hasNext(): interpreter.next(); debug('( Stack is now %s )' % str(interpreter.mem))
+        return interpreter.mem[::-1]
+    def evaluate(code, mem):
+        return Interpreter.operate(Tokenizer.tokenize(code), mem)
+    def peek(self):
+        return self.mem[0]
+    def count(self, count):
+        return self.mem[:count]
+    def pop(self):
+        front = self.peek()
+        self.mem = self.mem[1:]
+        return front
+    def popCount(self, count):
+        front = self.count(count)
+        self.mem = self.mem[count:]
+        return front
+    def popAll(self):
+        return self.popCount(len(self.mem))
+    def push(self, value):
+        if type(value) == type(splat([])):
+            self.mem = list(value.array) + self.mem
+        else:
+            self.mem = [value] + self.mem
+        return self
+    def pushAll(self, *values):
+        for value in values[::-1]:
+            self.push(value)
+    def hasNext(self):
+        return bool(self.tokens)
+    def update(self):
+        if self.instruction_queue:
+            token = self.instruction_queue[0]
+            arity = arities.arities[token.content]
+            if len(self.mem) >= arity:
+                debug('( %s operates with enough items on stack after push )' % str(token))
+                function = functions.functions[token.content]
+                arguments = self.popCount(arity)
+                self.push(function(*arguments))
+                self.instruction_queue = self.instruction_queue[1:]
+                self.update()
+    def next(self):
+        token = self.tokens[0]
+        debug('Evaluating %s' % str(token))
+        self.tokens = self.tokens[1:]
+        if token.isLiteral():
+            debug('( Literal token )')
+            self.push(token.content)
+            self.update()
+        elif token.isList():
+            debug('( List token )')
+            tokenlist = token.content
+            valuelist = Interpreter.operate(tokenlist, [])
+            self.push(valuelist)
+            self.update
+        elif token.isInstruction() and all(char in code_page for char in token.content):
+            debug('( Instruction Token )')
+            arity = arities.arities[token.content]
+            debug('( Arity %d )' % arity)
+            if arity == -1:
+                debug('( Operates over entire stack )')
+                function = functions.functions[token.content]
+                arguments = self.popAll()
+                self.push(function(*arguments))
+                self.update()
+            elif len(self.mem) >= arity:
+                debug('( Enough items on stack )')
+                function = functions.functions[token.content]
+                arguments = self.popCount(arity)
+                self.push(function(*arguments))
+                self.update()
+            else:
+                debug('( Not enough items on stack; adding to queue )')
+                self.instruction_queue.append(token)
+        elif token.isBlock():
+            listmode = type(self.peek()) == type([])
+            array = self.pop() if listmode else self.popAll()
+            def push(array):
+                if listmode: self.push(array)
+                else: self.pushAll(*array)
+            if token.type == 'BlockSortToken':
+                push(sorted(array, key = lambda x: Interpreter.operate(token.content, [x])))
+            elif token.type == 'BlockMapToken':
+                push(map(lambda x: Interpreter.operate(token.content, [x])[0], array))
+            elif token.type == 'BlockFilterToken':
+                push(filter(lambda x: Interpreter.operate(token.content, [x])[0], array))
+            elif token.type == 'BlockFilterOutToken':
+                push(filter(lambda x: not Interpreter.operate(token.content, [x])[0], array))
+            elif token.type == 'BlockReduceToken':
+                f = lambda x, y: Interpreter.operate(token.content, [x, y])[0]
+                while len(array) > 1:
+                    array[1] = f(array[0], array[1])
+                    array = array[1:]
+                push(array)
+
+verbose = True
 
 code = input()
+tokens = Tokenizer.tokenize(code)
+print(tokens)
 
-tokenizer = Tokenizer(code)
-while tokenizer.hasNext():
-    token = tokenizer.next()
-    instruction_queue.append(token)
-print(instruction_queue)
+interpreter = Interpreter(tokens)
+while interpreter.hasNext():
+    interpreter.next()
+print(interpreter.mem)
+print(interpreter.instruction_queue)
