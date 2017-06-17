@@ -35,6 +35,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `÷`: Float Division  
 `!`: Factorial / Pi Function  
 `"`: Duplicate top of stack  
+`#`: Parse to integer or float  
 `&`: Logical AND  
 `+`: Addition (Integer, String)  
 `-`: Negate (Integer)  

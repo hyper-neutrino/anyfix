@@ -30,7 +30,7 @@ functions = {
     ' ': lambda: 0,
     '!': lambda x: Pi(x),
     '"': lambda x: splat([x, x]),
-    '#': lambda: 0,
+    '#': lambda x: float(x) if '.' in x else int(x),
     '$': lambda: 0,
     '%': lambda: 0,
     '&': lambda x, y: True if y and x else False,
