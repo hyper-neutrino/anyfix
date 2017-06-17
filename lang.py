@@ -11,7 +11,8 @@ codeblock_tokens = {
     '€': 'BlockMapToken',
     'þ': 'BlockFilterToken',
     'ʠ': 'BlockFilterOutToken',
-    '/': 'BlockReduceToken'
+    '/': 'BlockReduceToken',
+    '¿': 'ConditionalWhileToken'
 }
 
 extenders = ['Æ', 'Œ', 'æ', 'œ']
@@ -76,6 +77,10 @@ class Token():
         return self.type.startswith('Instruction')
     def isCombo(self):
         return self.type.startswith('Combo')
+    def isConditional(self):
+        return self.type.startswith('Conditional')
+    def isBlockToker(self):
+        return self.isBlock() or self.isConditional()
 
 class Tokenizer():
     def __init__(self, code):
@@ -97,6 +102,12 @@ class Tokenizer():
         self.next()
         token = self.tokens[-1]
         self.tokens = self.tokens[:-1]
+        return token
+    def peek(self):
+        index = self.index
+        self.advance()
+        token = self.take()
+        self.index = index
         return token
     def next(self):
         debug('( Now on $%s$ )' % self.current())
@@ -125,8 +136,7 @@ class Tokenizer():
                 self.advance()
                 self.tokens.append(Token('LiteralStringToken', escape(self.code[self.advance()])))
             else:
-                self.advance()
-                self.tokens.append(Token('LiteralStringToken', self.current()))
+                self.tokens.append(Token('LiteralStringToken', self.code[self.advance()]))
         elif self.current() in '0123456789.':
             decimal = False
             base = 10
@@ -166,14 +176,14 @@ class Tokenizer():
         elif self.current() == '»':
             tokenlist = []
             buffer = 0
-            while buffer or not self.tokens[-1].isBlock():
+            while buffer or not self.tokens[-1].isBlockToker():
                 debug('( Token Grouper found token %s )' % str(self.tokens[-1]))
                 tokenlist = [self.tokens[-1]] + tokenlist
                 self.tokens = self.tokens[:-1]
                 debug('( Token list is now %s )' % str(self.tokens))
                 if tokenlist[0].isCombo():
                     buffer += 1
-                elif tokenlist[0].isBlock():
+                elif tokenlist[0].isBlockToker():
                     buffer -= 1
             self.tokens.append(Token('ComboToken', tokenlist))
             self.advance()
@@ -216,7 +226,11 @@ class Interpreter():
     def popAll(self):
         return self.popCount(len(self.mem))
     def push(self, value):
-        if type(value) == type(splat([])):
+        if value == None:
+            pass
+        elif type(value) == type(actualNone()):
+            self.mem = [None] + self.mem
+        elif type(value) == type(splat([])):
             self.mem = list(value.array) + self.mem
         else:
             self.mem = [value] + self.mem
@@ -260,9 +274,28 @@ class Interpreter():
                 arguments = self.popAll()
                 self.push(function(*arguments))
             elif arity == -2:
-                debug('( Operates over list )')
+                debug('( Operates over iterable )')
                 function = functions.functions[token.content]
-                if hasattr(self.peek(), '__getitem__'):
+                if isIterable(self.peek()):
+                    top = self.pop()
+                    result = function(*top)
+                    if type(result) == type(splat([])): result = result.array
+                    if type(top) != type(result):
+                        if type(top) == type(''):
+                            result = str(result)
+                        elif type(top) == type([]):
+                            result = list(result)
+                        elif type(top) == type(tuple([])):
+                            result = tuple(result)
+                        elif type(top) == type(set([])):
+                            result = set(result)
+                    self.push(result)
+                else:
+                    self.push(function(*self.popAll()))
+            elif arity == -3:
+                debug('( Operates over iterable not string )')
+                function = functions.functions[token.content]
+                if isIterable(self.peek()) and type(self.peek()) != type(''):
                     top = self.pop()
                     result = function(*top)
                     if type(result) == type(splat([])): result = result.array
@@ -307,12 +340,20 @@ class Interpreter():
                     array = array[1:]
                 push(array)
             self.tokens = self.tokens[1:]
+        elif token.isConditional():
+            if token.type == 'ConditionalWhileToken':
+                debug('Operating WHILE on stack %s' % str(self.mem))
+                while self.mem and self.pop():
+                    self.mem = Interpreter.operate([self.nextToken()], self.mem)
+                    debug('Stack after WHILE loop: %s' % str(self.mem))
+                self.tokens = self.tokens[1:]
         elif token.isCombo():
             self.mem = Interpreter.operate(token.content, self.mem)
         self.update()
+        debug('Stack: %s' % str(self.mem))
 
-verbose = '@verbose' in sys.argv
-file = '@file' in sys.argv
+verbose = '@verbose' in sys.argv or '@v' in sys.argv
+file = '@file' in sys.argv or '@f' in sys.argv
 
 code = ''
 if file:
@@ -322,6 +363,9 @@ else:
     code = input()
 tokens = Tokenizer.tokenize(code)
 debug('TOKENS: %s' % str(tokens))
+
+if '@tokenize' in sys.argv:
+    exit(0)
 
 interpreter = Interpreter(tokens)
 
@@ -333,5 +377,15 @@ interpreter.mem = interpreter.mem[::-1]
 
 while interpreter.hasNext():
     interpreter.next()
-print('Memory:', interpreter.mem)
-print('Instruction Queue:', interpreter.instruction_queue)
+
+if '@list' in sys.argv or '@l' in sys.argv:
+    print('[', end = '')
+    for index in range(len(interpreter.mem)):
+        print(interpreter.mem[index], end = ('' if index == len(interpreter.mem) - 1 else ', '))
+    print(']')
+elif '@spaced' in sys.argv or '@s' in sys.argv:
+    print(' '.join(map(str, interpreter.mem)))
+elif '@newlines' in sys.argv or '@n' in sys.argv:
+    print('\n'.join(map(str, interpreter.mem)))
+else:
+    print(''.join(map(str, interpreter.mem)))
