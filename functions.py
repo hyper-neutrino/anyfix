@@ -138,7 +138,7 @@ functions = {
     'ɗ': lambda: 0,
     'ƒ': lambda: 0,
     'ɠ': lambda: input(),
-    'ɦ': lambda: 0,
+    'ɦ': lambda: exhaustInput(),
     'ƙ': lambda: 0,
     'ɱ': lambda: 0,
     'ɲ': lambda: 0,

@@ -276,11 +276,16 @@ class Interpreter():
             elif arity == -2:
                 debug('( Operates over iterable )')
                 function = functions.functions[token.content]
+                result = []
+                top = None
                 if isIterable(self.peek()):
                     top = self.pop()
                     result = function(*top)
+                else:
+                    result = function(*self.popAll())
+                if top != None:
                     if type(result) == type(splat([])): result = result.array
-                    if type(top) != type(result):
+                    if type(top) != type(result) and isIterable(result):
                         if type(top) == type(''):
                             result = str(result)
                         elif type(top) == type([]):
@@ -289,9 +294,7 @@ class Interpreter():
                             result = tuple(result)
                         elif type(top) == type(set([])):
                             result = set(result)
-                    self.push(result)
-                else:
-                    self.push(function(*self.popAll()))
+                self.push(result)
             elif arity == -3:
                 debug('( Operates over iterable not string )')
                 function = functions.functions[token.content]

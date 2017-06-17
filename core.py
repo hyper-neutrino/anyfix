@@ -101,3 +101,11 @@ def Pi(number):
 		except:
 			return functools.reduce(operator.mul, range(1, number + 1), 1)
 	return math.gamma(number + 1)
+
+def exhaustInput():
+    result = []
+    line = input()
+    while line:
+        result.append(line)
+        line = input()
+    return result

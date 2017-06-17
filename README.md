@@ -70,6 +70,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `Ƥ`: Print followed by a newline  
 `ƈ`: Read a single character of input  
 `ɠ`: Read a line of input  
+`ɦ`: Read all input into a list of lines  
 `ƥ`: Print not followed by a newline  
 `Ạ`: Python AND  
 `Ḷ`: Range `[0..x-1]`  
