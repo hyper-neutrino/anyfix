@@ -343,7 +343,7 @@ class Interpreter():
         elif token.isConditional():
             if token.type == 'ConditionalWhileToken':
                 debug('Operating WHILE on stack %s' % str(self.mem))
-                while self.mem and self.pop():
+                while self.mem and self.peek():
                     self.mem = Interpreter.operate([self.nextToken()], self.mem)
                     debug('Stack after WHILE loop: %s' % str(self.mem))
                 self.tokens = self.tokens[1:]
