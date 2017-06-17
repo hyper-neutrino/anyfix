@@ -1,5 +1,7 @@
 # anyfix
 
+Anyfix was inspired by Jelly and 05AB1E, two of my favorite golfing languages made by Dennis and Adnan (PPCG), respectively. It uses the Jelly SBCS. It was designed to support prefix, infix, postfix, or any combination of the three, by waiting for there to be enough arguments before applying an operation (instead of throwing errors) but because of that, dyads and above default to prefix and monads default to postfix. Also, the chain `<dyad><monad><value1><value2>` will actually evaluate to `monad(dyad(value1, value2))`, not `dyad(monad(value1), value2)`, so don't depend on the prefix or infix parts of this language :P
+
 ## syntax
 
 `“string”`: string of arbitrary length. `\k` for any character `k` currently returns `k` for most `k`; changes will be made later.  
