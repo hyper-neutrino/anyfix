@@ -242,15 +242,16 @@ class Interpreter():
         return bool(self.tokens)
     def update(self):
         if self.instruction_queue:
-            token = self.instruction_queue[0]
-            arity = arities.arities[token.content]
-            if len(self.mem) >= arity:
-                debug('( %s operates with enough items on stack after push )' % str(token))
-                function = functions.functions[token.content]
-                arguments = self.popCount(arity)
-                self.push(function(*arguments))
-                self.instruction_queue = self.instruction_queue[1:]
-                self.update()
+            for i in range(len(self.instruction_queue)):
+                token = self.instruction_queue[i]
+                arity = arities.arities[token.content]
+                if len(self.mem) >= arity:
+                    debug('( %s operates with enough items on stack after push )' % str(token))
+                    function = functions.functions[token.content]
+                    arguments = self.popCount(arity)
+                    self.push(function(*arguments))
+                    self.instruction_queue = self.instruction_queue[:i] + self.instruction_queue[i + 1:]
+                    self.update()
     def next(self):
         token = self.tokens[0]
         self.tokens = self.tokens[1:]
