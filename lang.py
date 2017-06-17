@@ -352,26 +352,18 @@ class Interpreter():
         self.update()
         debug('Stack: %s' % str(self.mem))
 
-verbose = '@verbose' in sys.argv or '@v' in sys.argv
-file = '@file' in sys.argv or '@f' in sys.argv
+verbose = False
 
 code = ''
-if file:
-    with open(sys.argv[sys.argv.index('@file') + 1], 'r') as f:
-        code = f.read()
-else:
-    code = input()
+code = sys.argv[1]
 tokens = Tokenizer.tokenize(code)
 debug('TOKENS: %s' % str(tokens))
 
-if '@tokenize' in sys.argv:
-    exit(0)
-
 interpreter = Interpreter(tokens)
 
-for index in range(1, len(sys.argv)):
-    if not sys.argv[index].startswith('@') and not (file and index == sys.argv.index('@file') + 1):
-        interpreter.mem.append(eval(argument))
+for index in range(2, len(sys.argv)):
+    if not sys.argv[index].startswith('@'):
+        interpreter.mem.append(eval(sys.argv[index]))
 
 interpreter.mem = interpreter.mem[::-1]
 
