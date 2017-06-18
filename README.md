@@ -93,6 +93,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ɠ`: Read a line of input  
 `ɦ`: Read all input into a list of lines  
 `ƥ`: Print not followed by a newline  
+`ʂ`: Replace all occurrences of the pattern `2-from-top` with `1-from-top` in the string `top`  
 `Ạ`: Python AND  
 `Ḅ`: Bit (`x % 2`)  
 `İ`: Reverse increments; cumulatively add all of the elements of the array `top` to the element `1-from-top`. `1 10R İ` is equivalent to `10R \+ +1`  
