@@ -123,7 +123,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 
 ## examples
 `“Hello, World!”` - prints `"Hello, World!"`. Heh, very boring.  
-(more to come later
+(more to come later)
 
 # license
 
