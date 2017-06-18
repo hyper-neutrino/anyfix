@@ -2,6 +2,10 @@
 
 Anyfix was inspired by Jelly and 05AB1E, two of my favorite golfing languages made by Dennis and Adnan (PPCG), respectively. It uses the Jelly SBCS. It was designed to support prefix, infix, postfix, or any combination of the three, by waiting for there to be enough arguments before applying an operation (instead of throwing errors) but because of that, dyads and above default to prefix and monads default to postfix. As soon as any of the operators have enough arguments, the first one in the program will be executed, and it will update again to see if any others can run because of the update.
 
+# note
+
+Anyfix is currently under heavy development so things may change at any time without warning. I will try to not break things that worked in the past but no guarantees are made.
+
 ## syntax
 
 `“string”`: string of arbitrary length. `\k` for any character `k` currently returns `k` for most `k`; changes will be made later.  
@@ -120,3 +124,13 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 ## examples
 `“Hello, World!”` - prints `"Hello, World!"`. Heh, very boring.  
 (more to come later
+
+# license
+
+  Copyright 2017, Alexander Liao
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
