@@ -36,8 +36,10 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `®`: Push register  
 `½`: Square Root  
 `Æ½`: Integer Square Root  
+`Ç`: Copy `1-from-top` to top  
 `Ð`: Triplicate top of stack  
 `×`: Multiply  
+`ç`: Copy `1-from-top` `{top}` times  
 `ı`: Complex Number  
 `ȷ`: `1-from-top * 10 ** top` (exp-10)  
 `÷`: Float Division  
