@@ -77,7 +77,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `³`: 16  
 `⁴`: 10  
 `⁵`: 100  
-`⁶`: 1000  
+`⁶`: ' '  
 `⁷`: ''  
 `⁸`: '\n'  
 `⁹`: []  

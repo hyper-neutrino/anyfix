@@ -114,7 +114,7 @@ functions = {
     '³': lambda: 16,
     '⁴': lambda: 10,
     '⁵': lambda: 100,
-    '⁶': lambda: 1000,
+    '⁶': lambda: ' ',
     '⁷': lambda: '',
     '⁸': lambda: '\n',
     '⁹': lambda: [],
