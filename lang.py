@@ -274,7 +274,7 @@ class Interpreter():
                     function = functions.functions[token.content]
                     result = []
                     top = None
-                    if isIterable(self.peek()) and (arity == -2 or type(self.peek()) != type('')):
+                    if isIterable(self.peek()) and arity == -2 and type(self.peek()) != type(''):
                         top = self.pop()
                         result = function(*top)
                     else:
