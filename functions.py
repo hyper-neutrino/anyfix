@@ -16,7 +16,7 @@ functions = {
     '½': lambda x: sqrt(x),
     'Æ½': lambda x: int(sqrt(x)),
     'Ç': lambda: 0,
-    'Ð': lambda: 0,
+    'Ð': lambda x: splat([x] * 3, force = True),
     'Ñ': lambda: 0,
     '×': lambda x, y: y * x,
     'Ø': lambda: 0,
