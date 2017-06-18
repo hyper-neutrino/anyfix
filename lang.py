@@ -344,7 +344,7 @@ class Interpreter():
                 debug('Operating WHILE on stack %s' % str(self.mem))
                 getter = self.pop if token.type == 'ConditionalPopWhileToken' else self.peek
                 values = []
-                condition = (lambda: len(values) < 2 or values[-1] != values[-2]) if token.type == 'ConditionalUniqueWhileToken' else (lambda: self.mem and getter())
+                condition = (lambda: len(set(values)) != len(values)) if token.type == 'ConditionalUniqueWhileToken' else (lambda: self.mem and getter())
                 while condition():
                     self.mem = Interpreter.operate([self.nextToken()], self.mem)
                     values.append(self.mem)

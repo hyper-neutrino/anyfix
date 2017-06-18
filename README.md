@@ -22,8 +22,11 @@ Anyfix was inspired by Jelly and 05AB1E, two of my favorite golfing languages ma
 `£code»`: map the stack over a key function, even if the top of the stack is a list  
 `þcode»`: filter over a key function. If top-of-stack is a list, filter that; otherwise, filter the whole stack  
 `ʠcode»`: filter out over a key function. If top-of-stack is a list, filter out that; otherwise, apply on the whole stack  
-`/code»`: reduce over a key (dyadic) function.
-`¿code»`: while loop; pop the top of the stack each time and if stack is non-empty and the popped value is true, run the code on the stack  
+`/code»`: reduce over a key (dyadic) function  
+`\code»`: reduce over a key (dyadic) function, keeping intermediate results  
+`¿code»`: while loop; look at the top of the stack each time and if stack is non-empty and the top value is true, run the code on the stack  
+`¢code»`: while loop; pop the top of the stack each time and if stack is non-empty and the popped value is true, run the code on the stack
+`¡code»`: while loop; keep running the code until the elements are no longer unique  
 
 Codeblocks do not need the trailing '»'; that's only required for if `code` contains more than one token.  
 
