@@ -145,7 +145,7 @@ functions = {
     'ɲ': lambda: 0,
     'ƥ': lambda x: print(x, end = ''),
     'ɼ': lambda: 0,
-    'ʂ': lambda x, y, z: re.sub(z, y, x),
+    'ʂ': lambda x, y, z: re.sub(x, y, z),
     'ƭ': lambda: 0,
     'ʋ': lambda: 0,
     'ȥ': lambda: 0,
