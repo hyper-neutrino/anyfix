@@ -29,7 +29,7 @@ functions = {
     'ø': lambda: 0,
     ' ': lambda: 0,
     '!': lambda x: Pi(x),
-    '"': lambda x: splat([x, x]),
+    '"': lambda x: splat([x, x], force = True),
     '#': lambda x: float(x) if '.' in x else int(x),
     '$': lambda: 0,
     '%': lambda x, y: y % x,
