@@ -45,6 +45,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `+`: Addition (Integer, String, List Element-wise)  
 `-`: Negate (Integer)  
 `:`: Integer Division  
+`;`: Concatenate. Implicitly calls converts from integers to strings  
 `=`: Equality Check  
 `?`: Ternary: `2-from-top if top else 1-from-top`  
 `A`: Absolute Value  
