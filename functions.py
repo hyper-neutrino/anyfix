@@ -95,7 +95,7 @@ functions = {
     'p': lambda: 0,
     'q': lambda: 0,
     'r': lambda: 0,
-    's': lambda: 0,
+    's': lambda x, y: blocks(y, x),
     't': lambda: 0,
     'u': lambda: 0,
     'v': lambda: 0,

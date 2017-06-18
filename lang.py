@@ -148,7 +148,7 @@ class Tokenizer():
                     self.advance()
                 else:
                     break
-            self.tokens.append(Token('LiteralNumberToken', baseconvert(number, base)))
+            self.tokens.append(Token('LiteralNumberToken', float(number)))
         elif self.current() in bracket_closers:
             array = []
             opener = self.current()

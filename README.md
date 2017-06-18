@@ -70,6 +70,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `X`: Expand the top of the stack to individual elements; does nothing if the top is not iterable  
 `_`: Subtraction; `1-from-top - top`  
 `b`: Convert from number to digits in specified base  
+`s`: Split list into sublists of specified length  
 `x`: Repeat List Element-wise (`[1 2 3] x 4` becomes `[1 1 1 1 2 2 2 2 3 3 3 3]`)  
 `|`: Logical OR  
 `¹`: Identity (returns the argument)  

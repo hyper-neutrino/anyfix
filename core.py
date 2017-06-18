@@ -270,3 +270,10 @@ def stringify(thing):
         return ''.join(map(stringify, thing))
     else:
         return str(thing)
+
+def blocks(array, length):
+    result = []
+    while array:
+        result.append(array[:min(length, len(array))])
+        array = array[min(length, len(array)):]
+    return result
