@@ -53,6 +53,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `=`: Equality Check  
 `>`: Greater Than  
 `?`: Ternary: `2-from-top if top else 1-from-top`  
+`@`: Pop the top of the stack into the register  
 `A`: Absolute Value  
 `B`: Integer -> Binary Digits, or String -> Characters; does nothing to multi-value things
 `D`: Integer -> Decimal Digits, or String -> Characters; does nothing to multi-value things  
