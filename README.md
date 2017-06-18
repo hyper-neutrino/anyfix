@@ -84,6 +84,8 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `⁺`: Only keep positive numbers and strings  
 `¯`: Only keep negative numbers  
 `⁼`: Check type equality  
+`⁽`: Move the top of the stack to the bottom  
+`⁾`: Move the bottom of the stack to the top  
 `Ƒ`: Find the start and end of all matches of the pattern `1-from-top` in the string `top`  
 `Ɠ`: Evaluate a single line of input  
 `Ɱ`: Determine whether or not the pattern `1-from-top` matches the start of the string `top`  
