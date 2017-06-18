@@ -4,9 +4,9 @@ Anyfix was inspired by Jelly and 05AB1E, two of my favorite golfing languages ma
 
 ## syntax
 
-`“string”` or `"string"`: string of arbitrary length. `\k` for any character `k` currently returns `k` for most `k`; changes will be made later.  
+`“string”`: string of arbitrary length. `\k` for any character `k` currently returns `k` for most `k`; changes will be made later.  
 `“string1“string2“string3”`: list of strings of arbitrary length, of arbitrary length. String syntax still applies  
-`”c` or `'c`: string of length `1`. `'\k` still works.  
+`”c`: string of length `1`. `'\k` still works.  
 `123`: number  
 `0123`: octal  
 `0b11`: binary  

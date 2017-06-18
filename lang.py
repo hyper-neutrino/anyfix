@@ -131,18 +131,6 @@ class Tokenizer():
                 self.advance()
             self.advance()
             self.tokens.append(Token('LiteralStringToken', strings[0]) if len(strings) == 1 else Token('MultivalueListToken', [Token('LiteralStringToken', string) for string in strings]))
-        elif self.current() == '"':
-            self.advance()
-            string = ''
-            while self.current() != '"':
-                if self.current() == '\\':
-                    string += escape(self.code[self.index + 1])
-                    self.advance()
-                else:
-                    string += self.current()
-                self.advance()
-            self.advance()
-            self.tokens.append(Token('LiteralStringToken', string))
         elif self.current() == '”':
             self.advance()
             if self.current() == '\\':
@@ -152,20 +140,7 @@ class Tokenizer():
                 self.tokens.append(Token('LiteralStringToken', self.code[self.advance()]))
         elif self.current() in '0123456789.':
             decimal = False
-            base = 10
-            bases = ' bq x'
-            if self.code[self.advance()] == '0':
-                if self.hasNext():
-                    if self.current() != ' ' and self.current() in bases: base = 2 ** bases.find(self.current())
-                    elif self.current() in '0123456789': base = 8
-                    elif self.current() == '.': base = 10
-                else:
-                    self.tokens.append(Token('LiteralNumberToken', 0))
             number = ''
-            if base == 10:
-                self.index -= 1
-            elif base != 8:
-                self.advance()
             while self.hasNext():
                 if self.current() in '0123456789' or self.current() == '.' and not decimal:
                     if self.current() == '.': decimal = True
@@ -387,4 +362,4 @@ elif '@spaced' in sys.argv or '@s' in sys.argv:
 elif '@newlines' in sys.argv or '@n' in sys.argv:
     print('\n'.join(map(str, interpreter.mem)))
 else:
-    print(''.join(map(str, interpreter.mem)))
+    print(stringify(interpreter.mem))

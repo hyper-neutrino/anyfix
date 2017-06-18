@@ -1,5 +1,5 @@
 from math import *
-import functools, operator, anyfix_globals, re
+import functools, operator, anyfix_globals, re, sympy
 
 class splat():
     def __init__(self, array, force = False):
@@ -146,7 +146,12 @@ def isNumber(x):
 
 def add(x, y):
     if isNumber(x) and isNumber(y):
-        return x + y
+        if type(x) == type(0) and type(y) == type(0):
+            return x + y
+        else:
+            j, k = sympy.symbols('j k')
+            expr = j + k
+            return expr.subs([(j, x), (k, y)])
     elif type(x) == type('') and type(y) == type(''):
         result = ''
         for index in range(max(len(x), len(y))):
@@ -166,12 +171,38 @@ def add(x, y):
             else:
                 result.append(y[index])
         return result
-    elif type(x) == type('') or type(y) == type(''):
+    elif type(x) == type('') and isNumber(y) or type(y) == type('') and isNumber(x):
         return str(x) + str(y)
     elif isIterable(x):
         return add(x, [y] * len(x))
     elif isIterable(y):
         return add([x] * len(y), y)
+
+def multiply(x, y):
+    if isNumber(x) and isNumber(y):
+        if type(x) == type(0) and type(y) == type(0):
+            return x * y
+        else:
+            j, k = sympy.symbols('j k')
+            expr = j * k
+            return expr.subs([(j, x), (k, y)])
+    elif isIterable(x) and isIterable(y):
+        result = []
+        for index in range(max(len(x), len(y))):
+            if index < len(x):
+                if index < len(y):
+                    result.append(multiply(x[index], y[index]))
+                else:
+                    result.append(x[index])
+            else:
+                result.append(y[index])
+        return result
+    elif type(x) == type('') and isNumber(y) or type(y) == type('') and isNumber(x):
+        return x * y
+    elif isIterable(x):
+        return multiply(x, [y] * len(x))
+    elif isIterable(y):
+        return multiply([x] * len(y), y)
 
 def clone(x):
     if isNumber(x):
@@ -223,3 +254,19 @@ def allSpans(pattern, string):
         deleted += match.end()
         match = re.search(pattern, string[deleted:])
     return spans
+
+def GCD(x, y):
+    import time
+    time.sleep(1)
+    print(x, y)
+    if y > x: return GCD(y, x)
+    if round(x - y, anyfix_globals.values['r']) == 0:
+        return round(x, anyfix_globals.values['r'])
+    else:
+        return GCD(x - y, y)
+
+def stringify(thing):
+    if isIterable(thing) and thing != str(thing):
+        return ''.join(map(stringify, thing))
+    else:
+        return str(thing)
