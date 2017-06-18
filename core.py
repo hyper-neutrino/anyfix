@@ -1,18 +1,40 @@
 from math import *
-import functools
-import operator
+import functools, operator, anyfix_globals
 
 class splat():
-    def __init__(self, array):
-        self.array = array
-        self.__name__ = 'splat'
+    def __init__(self, array, force = False):
+        self.array = list(array)
+        self.force = force
+        self.__splat__ = True
 
 class actualNone():
     def __init__(self):
         pass
 
+def round(number, precision):
+    number = number + precision / 2 - (number + precision / 2) % precision
+    if number % 1 == 0:
+        return int(number)
+    else:
+        return number
+
+def rounder(precision):
+    return lambda number: round(number, precision)
+
 def basedigits(number, base):
-    return [(number % base ** (k + 1)) // (base ** k) for k in range(ceil(log(number, base)))[::-1]] if type(number) == type(0) else list(number) if number == str(number) else number
+    if number > 0:
+        digits = []
+        start = int(log(number, base))
+        while start + 1:
+            if start:
+                digits.append(int(number / (base ** start)))
+                number %= base ** start
+            start -= 1
+        return digits + [round(number, anyfix_globals.values['r'])]
+    elif number == 0:
+        return [0]
+    else:
+        return [-x for x in basedigits(-number, base)]
 
 def unbase(digits, base):
     return sum(digits[i] * base ** (len(digits) - i - 1) for i in range(len(digits)))
@@ -22,10 +44,6 @@ def castMultivalue(ref, apply):
         return apply
     elif type(ref) == type([]):
         return list(apply)
-    elif type(ref) == type(tuple([])):
-        return tuple(apply)
-    elif type(ref) == type(set([])):
-        return set(apply)
     else:
         return apply
 
@@ -109,3 +127,72 @@ def exhaustInput():
         result.append(line)
         line = input()
     return result
+
+def exhaustInputSingleString():
+    return '\n'.join(exhaustInput())
+
+def flatten(array):
+    result = []
+    for value in array:
+        if isIterable(value) and type(value) != type(''):
+            result += flatten(value)
+        else:
+            result.append(value)
+    return result
+
+def isNumber(x):
+    return type(x) == type(0) or type(x) == type(0.5)
+
+def add(x, y):
+    if isNumber(x) and isNumber(y):
+        return x + y
+    elif type(x) == type('') and type(y) == type(''):
+        result = ''
+        for index in range(max(len(x), len(y))):
+            if index < len(x):
+                result += x[index]
+            if index < len(y):
+                result += y[index]
+        return result
+    elif isIterable(x) and isIterable(y):
+        result = []
+        for index in range(max(len(x), len(y))):
+            if index < len(x):
+                if index < len(y):
+                    result.append(add(x[index], y[index]))
+                else:
+                    result.append(x[index])
+            else:
+                result.append(y[index])
+        return result
+    elif type(x) == type('') or type(y) == type(''):
+        return str(x) + str(y)
+
+def clone(x):
+    if isNumber(x):
+        return x
+    if isIterable(x):
+        if type(x) == type(''):
+            return x
+        else:
+            return [clone(k) for k in x]
+    else:
+        return x
+
+def append(x, y):
+    if isIterable(x) and isIterable(y):
+        return x + y
+    elif isIterable(x):
+        if type(x) == type(''):
+            return x + str(y)
+        else:
+            x = clone(x)
+            x.append(y)
+            return x
+    elif isIterable(y):
+        if type(y) == type(''):
+            y = clone(y)
+            y.insert(0, x)
+            return y
+    else:
+        return str(x) + str(y)

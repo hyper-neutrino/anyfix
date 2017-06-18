@@ -13,13 +13,13 @@ Anyfix was inspired by Jelly and 05AB1E, two of my favorite golfing languages ma
 `0q11`: quaternary  
 `0x11`: hexadecimal
 `[1 2 3]`: list. Can be nested like `[1 2 3 [4 5 6]]`. Try `[1[2[3[4]5]6]7]` :D  
-`{1 2 3}`: set
-`<1 2 3>`: tuple
 `(1 2 3)`: splat (that is, all elements returned by its evaluation will be pushed independently onto the stack). Useful for overriding order of operations
 
 ## codeblocks
 `ßcode»`: sort over a key function. If top-of-stack is a list, sort that; otherwise, sort the whole stack  
+`Ɓcode»`: sort the stack over a key function, even if the top of the stack is a list  
 `€code»`: map over a key function. If top-of-stack is a list, map that; otherwise, map the whole stack  
+`£code»`: map the stack over a key function, even if the top of the stack is a list  
 `þcode»`: filter over a key function. If top-of-stack is a list, filter that; otherwise, filter the whole stack  
 `ʠcode»`: filter out over a key function. If top-of-stack is a list, filter out that; otherwise, apply on the whole stack  
 `/code»`: reduce over a key (dyadic) function.
@@ -31,6 +31,8 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `©`: Copy top of stack to register  
 `¬`: Logical inverse  
 `®`: Push register  
+`½`: Square Root  
+`Æ½`: Integer Square Root  
 `×`: Multiply  
 `ı`: Complex Number  
 `ȷ`: `1-from-top * 10 ** top` (exp-10)  
@@ -39,7 +41,8 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `"`: Duplicate top of stack  
 `#`: Parse to integer or float  
 `&`: Logical AND  
-`+`: Addition (Integer, String)  
+`*`: Exponentiation  
+`+`: Addition (Integer, String, List Element-wise)  
 `-`: Negate (Integer)  
 `:`: Integer Division  
 `=`: Equality Check  
@@ -47,12 +50,15 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `A`: Absolute Value  
 `B`: Integer -> Binary Digits, or String -> Characters; does nothing to multi-value things
 `D`: Integer -> Decimal Digits, or String -> Characters; does nothing to multi-value things  
-`J`: Range of Length (according to `L`)
+`F`: Flatten Array  
+`J`: Range of Length (according to `L`)  
+`K`: Join by space  
 `L`: Length; converts numbers to strings automatically  
 `O`: String -> Map to code-points, Character -> code-point, Integer -> character at that code-point  
 `R`: Range `[1..x]`  
 `S`: Sum  
 `U`: Reverses the top if it can be iterated over; otherwise, the whole stack  
+`X`: Expand the top of the stack to individual elements; does nothing if the top is not iterable  
 `_`: Subtraction; `1-from-top - top`  
 `x`: Repeat List Element-wise (`[1 2 3] x 4` becomes `[1 1 1 1 2 2 2 2 3 3 3 3]`)  
 `|`: Logical OR  

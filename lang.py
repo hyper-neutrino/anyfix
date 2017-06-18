@@ -1,5 +1,5 @@
 from core import *
-import arities, functions, sys
+import arities, functions, sys, anyfix_globals
 
 code_page  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¶'''
 code_page += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
@@ -8,33 +8,32 @@ escapemap += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲ
 
 codeblock_tokens = {
     'ß': 'BlockSortToken',
+    'Ɓ': 'BlockStackSortToken',
     '€': 'BlockMapToken',
+    '£': 'BlockStackMapToken',
     'þ': 'BlockFilterToken',
     'ʠ': 'BlockFilterOutToken',
     '/': 'BlockReduceToken',
-    '¿': 'ConditionalWhileToken'
+    '\\': 'BlockReduceCumulativeToken',
+    '¿': 'ConditionalWhileToken',
+    '¢': 'ConditionalPopWhileToken',
+    '¡': 'ConditionalUniqueWhileToken'
 }
 
 extenders = ['Æ', 'Œ', 'æ', 'œ']
 
 bracket_closers = {
     '[': ']',
-    '<': '>',
-    '{': '}',
     '(': ')'
 }
 
 multitokens = {
     '[': 'MultivalueListToken',
-    '<': 'MultivalueTupleToken',
-    '{': 'MultivalueSetToken',
     '(': 'MultivalueSplatToken'
 }
 
 multivalue_converters = {
     'MultivalueListToken': list,
-    'MultivalueTupleToken': tuple,
-    'MultivalueSetToken': set,
     'MultivalueSplatToken': splat
 }
 
@@ -73,6 +72,8 @@ class Token():
         return self.type.startswith('Multivalue')
     def isBlock(self):
         return self.type.startswith('Block')
+    def isBlockStack(self):
+        return self.type.startswith('BlockStack')
     def isInstruction(self):
         return self.type.startswith('Instruction')
     def isCombo(self):
@@ -230,10 +231,16 @@ class Interpreter():
             pass
         elif type(value) == type(actualNone()):
             self.mem = [None] + self.mem
-        elif type(value) == type(splat([])):
-            self.mem = list(value.array) + self.mem
+        elif hasattr(value, '__splat__') and value.__splat__:
+            if value.force:
+                self.pushAll(*value.array)
+            else:
+                self.mem = [list(value.array)] + self.mem
         else:
-            self.mem = [value] + self.mem
+            if type(value) == type(0.5):
+                self.mem = [round(value, anyfix_globals.values['r'])] + self.mem
+            else:
+                self.mem = [value] + self.mem
         return self
     def pushAll(self, *values):
         for value in values[::-1]:
@@ -274,47 +281,25 @@ class Interpreter():
                 function = functions.functions[token.content]
                 arguments = self.popAll()
                 self.push(function(*arguments))
-            elif arity == -2:
+            elif arity <= -2:
                 debug('( Operates over iterable )')
-                function = functions.functions[token.content]
-                result = []
-                top = None
-                if isIterable(self.peek()):
-                    top = self.pop()
-                    result = function(*top)
-                else:
-                    result = function(*self.popAll())
-                if top != None:
-                    if type(result) == type(splat([])): result = result.array
-                    if type(top) != type(result) and isIterable(result):
-                        if type(top) == type(''):
-                            result = str(result)
-                        elif type(top) == type([]):
-                            result = list(result)
-                        elif type(top) == type(tuple([])):
-                            result = tuple(result)
-                        elif type(top) == type(set([])):
-                            result = set(result)
-                self.push(result)
-            elif arity == -3:
-                debug('( Operates over iterable not string )')
-                function = functions.functions[token.content]
-                if isIterable(self.peek()) and type(self.peek()) != type(''):
-                    top = self.pop()
-                    result = function(*top)
-                    if type(result) == type(splat([])): result = result.array
-                    if type(top) != type(result):
-                        if type(top) == type(''):
-                            result = str(result)
-                        elif type(top) == type([]):
-                            result = list(result)
-                        elif type(top) == type(tuple([])):
-                            result = tuple(result)
-                        elif type(top) == type(set([])):
-                            result = set(result)
+                if self.mem:
+                    function = functions.functions[token.content]
+                    result = []
+                    top = None
+                    if isIterable(self.peek()) and (arity == -2 or type(self.peek()) != type('')):
+                        top = self.pop()
+                        result = function(*top)
+                    else:
+                        result = function(*self.popAll())
+                        if top != None:
+                            if (hasattr(result, '__splat__') and result.__splat__) and not result.force: result = result.array
+                            if type(top) != type(result) and isIterable(result):
+                                if type(top) == type(''):
+                                    result = str(result)
+                                elif type(top) == type([]):
+                                    result = list(result)
                     self.push(result)
-                else:
-                    self.push(function(*self.popAll()))
             elif len(self.mem) >= arity:
                 debug('( Enough items on stack )')
                 function = functions.functions[token.content]
@@ -324,31 +309,40 @@ class Interpreter():
                 debug('( Not enough items on stack; adding to queue )')
                 self.instruction_queue.append(token)
         elif token.isBlock():
-            listmode = type(self.peek()) == type([])
+            listmode = not token.isBlockStack() and isIterable(type(self.peek()))
             array = self.pop() if listmode else self.popAll()
             def push(array):
                 if listmode: self.push(array)
                 else: self.pushAll(*array)
-            if token.type == 'BlockSortToken':
+            if token.type.endswith('SortToken'):
                 push(list(sorted(array, key = lambda x: Interpreter.operate([self.nextToken()], [x]))))
-            elif token.type == 'BlockMapToken':
+            elif token.type.endswith('MapToken'):
                 push(list(map(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array)))
-            elif token.type == 'BlockFilterToken':
+            elif token.type.endswith('FilterToken'):
                 push(list(filter(lambda x: Interpreter.operate([self.nextToken()], [x])[0], array)))
-            elif token.type == 'BlockFilterOutToken':
+            elif token.type.endswith('FilterOutToken'):
                 push(list(filter(lambda x: not Interpreter.operate([self.nextToken()], [x])[0], array)))
-            elif token.type == 'BlockReduceToken':
+            elif token.type.endswith('ReduceToken'):
                 f = lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0]
                 while len(array) > 1:
                     array[1] = f(array[0], array[1])
                     array = array[1:]
                 push(array)
+            elif token.type.endswith('ReduceCumulativeToken'):
+                f = lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0]
+                for index in range(1, len(array)):
+                    array[index] = f(array[index - 1], array[index])
+                push(array)
             self.tokens = self.tokens[1:]
         elif token.isConditional():
-            if token.type == 'ConditionalWhileToken':
+            if token.type.endswith('WhileToken'):
                 debug('Operating WHILE on stack %s' % str(self.mem))
-                while self.mem and self.peek():
+                getter = self.pop if token.type == 'ConditionalPopWhileToken' else self.peek
+                values = []
+                condition = (lambda: len(values) < 2 or values[-1] != values[-2]) if token.type == 'ConditionalUniqueWhileToken' else (lambda: self.mem and getter())
+                while condition():
                     self.mem = Interpreter.operate([self.nextToken()], self.mem)
+                    values.append(self.mem)
                     debug('Stack after WHILE loop: %s' % str(self.mem))
                 self.tokens = self.tokens[1:]
         elif token.isCombo():
@@ -366,7 +360,11 @@ debug('TOKENS: %s' % str(tokens))
 interpreter = Interpreter(tokens)
 
 for index in range(2, len(sys.argv)):
-    if not sys.argv[index].startswith('@'):
+    if sys.argv[index].startswith('@'):
+        key = sys.argv[index][1]
+        if key in anyfix_globals.values:
+            anyfix_globals.setGlobal(key, anyfix_globals.typers[key](sys.argv[index][2:]))
+    else:
         interpreter.mem.append(eval(sys.argv[index]))
 
 interpreter.mem = interpreter.mem[::-1]
