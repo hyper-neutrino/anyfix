@@ -42,25 +42,30 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `#`: Parse to integer or float  
 `&`: Logical AND  
 `*`: Exponentiation  
-`+`: Addition (Integer, String, List Element-wise)  
+`+`: Addition (Integer, String, List Element-wise, Integer into List on each element)  
 `-`: Negate (Integer)  
 `:`: Integer Division  
 `;`: Concatenate. Implicitly calls converts from integers to strings  
+`<`: Less Than  
 `=`: Equality Check  
+`>`: Greater Than  
 `?`: Ternary: `2-from-top if top else 1-from-top`  
 `A`: Absolute Value  
 `B`: Integer -> Binary Digits, or String -> Characters; does nothing to multi-value things
 `D`: Integer -> Decimal Digits, or String -> Characters; does nothing to multi-value things  
 `F`: Flatten Array  
+`I`: Differences between elements  
 `J`: Range of Length (according to `L`)  
 `K`: Join by space  
 `L`: Length; converts numbers to strings automatically  
 `O`: String -> Map to code-points, Character -> code-point, Integer -> character at that code-point  
+`P`: Product  
 `R`: Range `[1..x]`  
 `S`: Sum  
 `U`: Reverses the top if it can be iterated over; otherwise, the whole stack  
 `X`: Expand the top of the stack to individual elements; does nothing if the top is not iterable  
 `_`: Subtraction; `1-from-top - top`  
+`b`: Convert from number to digits in specified base  
 `x`: Repeat List Element-wise (`[1 2 3] x 4` becomes `[1 1 1 1 2 2 2 2 3 3 3 3]`)  
 `|`: Logical OR  
 `¹`: Identity (returns the argument)  
@@ -75,18 +80,25 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `⁺`: Only keep positive numbers and strings  
 `¯`: Only keep negative numbers  
 `⁼`: Check type equality  
+`Ƒ`: Find the start and end of all matches of the pattern `1-from-top` in the string `top`  
 `Ɠ`: Evaluate a single line of input  
+`Ɱ`: Determine whether or not the pattern `1-from-top` matches the start of the string `top`  
+`Ɲ`: Finds the end of the match of the pattern `1-from-top` in the string `top` if it matches; otherwise, 0  
 `Ƥ`: Print followed by a newline  
 `ƈ`: Read a single character of input  
+`ƒ`: Find all substrings of `top` that match pattern `1-from-top`, non-overlapping  
 `ɠ`: Read a line of input  
 `ɦ`: Read all input into a list of lines  
 `ƥ`: Print not followed by a newline  
 `Ạ`: Python AND  
+`Ḅ`: Bit (`x % 2`)  
+`İ`: Reverse increments; cumulatively add all of the elements of the array `top` to the element `1-from-top`. `1 10R İ` is equivalent to `10R \+ +1`  
 `Ḷ`: Range `[0..x-1]`  
 `Ọ`: Python OR  
-`Ŀ`: Edit Distance between strings / lists / integers (automatically converts to digits)  
 `Ḃ`: Binary digits -> Integer  
 `Ḋ`: Decimal digits -> Integer  
+`Ŀ`: Edit Distance between strings / lists / integers (automatically converts to digits)  
+`ḅ`: Convert list to number using specified base  
 `‘`: Increment  
 `’`: Decrement  
 

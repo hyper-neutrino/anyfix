@@ -131,6 +131,18 @@ class Tokenizer():
                 self.advance()
             self.advance()
             self.tokens.append(Token('LiteralStringToken', strings[0]) if len(strings) == 1 else Token('MultivalueListToken', [Token('LiteralStringToken', string) for string in strings]))
+        elif self.current() == '"':
+            self.advance()
+            string = ''
+            while self.current() != '"':
+                if self.current() == '\\':
+                    string += escape(self.code[self.index + 1])
+                    self.advance()
+                else:
+                    string += self.current()
+                self.advance()
+            self.advance()
+            self.tokens.append(Token('LiteralStringToken', string))
         elif self.current() == '”':
             self.advance()
             if self.current() == '\\':
@@ -323,16 +335,9 @@ class Interpreter():
             elif token.type.endswith('FilterOutToken'):
                 push(list(filter(lambda x: not Interpreter.operate([self.nextToken()], [x])[0], array)))
             elif token.type.endswith('ReduceToken'):
-                f = lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0]
-                while len(array) > 1:
-                    array[1] = f(array[0], array[1])
-                    array = array[1:]
-                push(array)
+                push(reduce(lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0], array))
             elif token.type.endswith('ReduceCumulativeToken'):
-                f = lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0]
-                for index in range(1, len(array)):
-                    array[index] = f(array[index - 1], array[index])
-                push(array)
+                push(cumulativeReduce(lambda x, y: Interpreter.operate([self.nextToken()], [x, y])[0], array))
             self.tokens = self.tokens[1:]
         elif token.isConditional():
             if token.type.endswith('WhileToken'):

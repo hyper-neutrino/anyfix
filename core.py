@@ -1,5 +1,5 @@
 from math import *
-import functools, operator, anyfix_globals
+import functools, operator, anyfix_globals, re
 
 class splat():
     def __init__(self, array, force = False):
@@ -23,6 +23,7 @@ def rounder(precision):
 
 def basedigits(number, base):
     if number > 0:
+        if base == 1: return [1] * int(number)
         digits = []
         start = int(log(number, base))
         while start + 1:
@@ -37,7 +38,7 @@ def basedigits(number, base):
         return [-x for x in basedigits(-number, base)]
 
 def unbase(digits, base):
-    return sum(digits[i] * base ** (len(digits) - i - 1) for i in range(len(digits)))
+    return len(digits) if base == 1 else sum(digits[i] * base ** (len(digits) - i - 1) for i in range(len(digits)))
 
 def castMultivalue(ref, apply):
     if type(apply) == type(ref):
@@ -167,6 +168,10 @@ def add(x, y):
         return result
     elif type(x) == type('') or type(y) == type(''):
         return str(x) + str(y)
+    elif isIterable(x):
+        return add(x, [y] * len(x))
+    elif isIterable(y):
+        return add([x] * len(y), y)
 
 def clone(x):
     if isNumber(x):
@@ -191,8 +196,30 @@ def append(x, y):
             return x
     elif isIterable(y):
         if type(y) == type(''):
+            return str(x) + y
+        else:
             y = clone(y)
             y.insert(0, x)
             return y
     else:
         return str(x) + str(y)
+
+def cumulativeReduce(function, array):
+    for index in range(1, len(array)):
+        array[index] = function(array[index], array[index - 1])
+    return array
+
+def reduce(function, array):
+    while len(array) > 1:
+        array = [function(array[1], array[0])] + list(array[2:])
+    return array[0]
+
+def allSpans(pattern, string):
+    deleted = 0
+    spans = []
+    match = re.search(pattern, string)
+    while match:
+        spans.append([match.start() + deleted + 1, match.end() + deleted + 1])
+        deleted += match.end()
+        match = re.search(pattern, string[deleted:])
+    return spans
