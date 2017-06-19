@@ -46,7 +46,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ç`: Copy `1-from-top` `{top}` times  
 `ı`: Complex Number  
 `ȷ`: `1-from-top * 10 ** top` (exp-10)  
-`÷`: Float Division  
+`÷`: Arbitrary-precision Division  
 `!`: Factorial / Pi Function  
 `"`: Duplicate top of stack  
 `#`: Parse to integer or float  
@@ -121,6 +121,9 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `Ḋ`: Decimal digits -> Integer  
 `Ŀ`: Edit Distance between strings / lists / integers (automatically converts to digits)  
 `ḅ`: Convert list to number using specified base  
+`ġ`: Greatest Common Divisor  
+`ŀ`: Lowest Common Multiple  
+`«`: Swap top two elements  
 `‘`: Increment  
 `’`: Decrement  
 

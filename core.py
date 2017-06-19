@@ -1,5 +1,5 @@
-from math import *
-import functools, operator, anyfix_globals, re, sympy
+from sympy import *
+import functools, operator, re, math
 
 class splat():
     def __init__(self, array, force = False):
@@ -28,17 +28,17 @@ def basedigits(number, base):
         start = int(log(number, base))
         while start + 1:
             if start:
-                digits.append(int(number / (base ** start)))
+                digits.append(Integer(number / (base ** start)))
                 number %= base ** start
             start -= 1
-        return digits + [round(number, anyfix_globals.values['r'])]
+        return digits + [number]
     elif number == 0:
         return [0]
     else:
         return [-x for x in basedigits(-number, base)]
 
 def unbase(digits, base):
-    return len(digits) if base == 1 else sum(digits[i] * base ** (len(digits) - i - 1) for i in range(len(digits)))
+    return Integer(len(digits)) if base == 1 else Rational(sum(digits[i] * base ** (len(digits) - i - 1) for i in range(len(digits))))
 
 def castMultivalue(ref, apply):
     if type(apply) == type(ref):
@@ -112,7 +112,7 @@ def repeat(array, times):
     return castMultivalue(array, result)
 
 def Pi(number):
-	if type(number) == int:
+	if type(number) < Integer:
 		if number < 0:
 			return inf
 		try:
@@ -142,16 +142,11 @@ def flatten(array):
     return result
 
 def isNumber(x):
-    return type(x) == type(0) or type(x) == type(0.5)
+    return type(x) < Number or type(x) == Number
 
-def add(x, y):
+def addition(x, y):
     if isNumber(x) and isNumber(y):
-        if type(x) == type(0) and type(y) == type(0):
-            return x + y
-        else:
-            j, k = sympy.symbols('j k')
-            expr = j + k
-            return expr.subs([(j, x), (k, y)])
+        return x + y
     elif type(x) == type('') and type(y) == type(''):
         result = ''
         for index in range(max(len(x), len(y))):
@@ -174,18 +169,26 @@ def add(x, y):
     elif type(x) == type('') and isNumber(y) or type(y) == type('') and isNumber(x):
         return str(x) + str(y)
     elif isIterable(x):
-        return add(x, [y] * len(x))
+        return addition(x, [y] * len(x))
     elif isIterable(y):
-        return add([x] * len(y), y)
+        return addition([x] * len(y), y)
+
+def repeatStr(string, times):
+    increment = Rational(1, len(string))
+    times = floor(times / increment) * increment
+    current = S.Zero
+    result = ''
+    index = 0
+    while current < times:
+        result += string[index]
+        index += 1
+        index %= len(string)
+        current += increment
+    return result
 
 def multiply(x, y):
     if isNumber(x) and isNumber(y):
-        if type(x) == type(0) and type(y) == type(0):
-            return x * y
-        else:
-            j, k = sympy.symbols('j k')
-            expr = j * k
-            return expr.subs([(j, x), (k, y)])
+        return x * y
     elif isIterable(x) and isIterable(y):
         result = []
         for index in range(max(len(x), len(y))):
@@ -197,8 +200,10 @@ def multiply(x, y):
             else:
                 result.append(y[index])
         return result
-    elif type(x) == type('') and isNumber(y) or type(y) == type('') and isNumber(x):
-        return x * y
+    elif type(x) == type('') and isNumber(y):
+        return repeatStr(x, y)
+    elif type(y) == type('') and isNumber(x):
+        return repeatStr(y, x)
     elif isIterable(x):
         return multiply(x, [y] * len(x))
     elif isIterable(y):
@@ -240,9 +245,9 @@ def cumulativeReduce(function, array):
         array[index] = function(array[index], array[index - 1])
     return array
 
-def reduce(function, array):
+def reduce(reductor, array):
     while len(array) > 1:
-        array = [function(array[1], array[0])] + list(array[2:])
+        array = [reductor(array[1], array[0])] + list(array[2:])
     return array[0]
 
 def allSpans(pattern, string):
@@ -254,16 +259,6 @@ def allSpans(pattern, string):
         deleted += match.end()
         match = re.search(pattern, string[deleted:])
     return spans
-
-def GCD(x, y):
-    import time
-    time.sleep(1)
-    print(x, y)
-    if y > x: return GCD(y, x)
-    if round(x - y, anyfix_globals.values['r']) == 0:
-        return round(x, anyfix_globals.values['r'])
-    else:
-        return GCD(x - y, y)
 
 def stringify(thing):
     if isIterable(thing) and thing != str(thing):

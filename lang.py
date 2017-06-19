@@ -1,5 +1,6 @@
 from core import *
-import arities, functions, sys, anyfix_globals
+from sympy import *
+import arities, functions, sys
 
 code_page  = '''¡¢£¤¥¦©¬®µ½¿€ÆÇÐÑ×ØŒÞßæçðıȷñ÷øœþ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¶'''
 code_page += '''°¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ƁƇƊƑƓƘⱮƝƤƬƲȤɓƈɗƒɠɦƙɱɲƥʠɼʂƭʋȥẠḄḌẸḤỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻạḅḍẹḥịḳḷṃṇọṛṣṭụṿẉỵẓȧḃċḋėḟġḣŀṁṅȯṗṙṡṫẇẋẏż«»‘’“”'''
@@ -148,7 +149,7 @@ class Tokenizer():
                     self.advance()
                 else:
                     break
-            self.tokens.append(Token('LiteralNumberToken', float(number)))
+            self.tokens.append(Token('LiteralNumberToken', Rational(number)))
         elif self.current() in bracket_closers:
             array = []
             opener = self.current()
@@ -224,10 +225,7 @@ class Interpreter():
             else:
                 self.mem = [list(value.array)] + self.mem
         else:
-            if type(value) == type(0.5):
-                self.mem = [round(value, anyfix_globals.values['r'])] + self.mem
-            else:
-                self.mem = [value] + self.mem
+            self.mem = [value] + self.mem
         return self
     def pushAll(self, *values):
         for value in values[::-1]:
@@ -274,7 +272,7 @@ class Interpreter():
                     function = functions.functions[token.content]
                     result = []
                     top = None
-                    if isIterable(self.peek()) and arity == -2 and type(self.peek()) != type(''):
+                    if isIterable(self.peek()) and (arity != -3 or type(self.peek()) != type('')):
                         top = self.pop()
                         result = function(*top)
                     else:
@@ -341,9 +339,10 @@ interpreter = Interpreter(tokens)
 
 for index in range(2, len(sys.argv)):
     if sys.argv[index].startswith('@'):
-        key = sys.argv[index][1]
-        if key in anyfix_globals.values:
-            anyfix_globals.setGlobal(key, anyfix_globals.typers[key](sys.argv[index][2:]))
+        pass
+        # key = sys.argv[index][1]
+        # if key in anyfix_globals.values:
+            # anyfix_globals.setGlobal(key, anyfix_globals.typers[key](sys.argv[index][2:]))
     else:
         interpreter.mem.append(eval(sys.argv[index]))
 
