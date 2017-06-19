@@ -99,6 +99,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `Ɱ`: Determine whether or not the pattern `1-from-top` matches the start of the string `top`  
 `Ɲ`: Finds the end of the match of the pattern `1-from-top` in the string `top` if it matches; otherwise, 0  
 `Ƥ`: Print followed by a newline  
+`Ƭ`: Split, not regular expression  
 `Ʋ`: Copy the `1-from-top` into the `top-of-stack`-th position in the stack  
 `Ȥ`: Copy the `top-of-stack`-th element to the top  
 `ƈ`: Read a single character of input  
@@ -106,7 +107,9 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ɠ`: Read a line of input  
 `ɦ`: Read all input into a list of lines  
 `ƥ`: Print not followed by a newline  
+`ɼ`: Replace all occurrences of the string `2-from-top` with `1-from-top` in the string `top`  
 `ʂ`: Replace all occurrences of the pattern `2-from-top` with `1-from-top` in the string `top`  
+`ƭ`: Split, regular expression  
 `ȥ`: Move the `top-of-stack`-th element to the top, pulling it out of the stack  
 `ʋ`: Push the `1-from-top` into the `top-of-stack`-th position in the stack  
 `Ạ`: Python AND  
