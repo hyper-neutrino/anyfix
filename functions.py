@@ -8,7 +8,7 @@ functions = {
     '¢': lambda: 0,
     '£': lambda: 0,
     '¤': lambda: 0,
-    '¥': lambda: 0,
+    '¥': lambda x, y: stringify(y, sigdig = x, chop = True),
     '¦': lambda: 0,
     '©': lambda x: setRegister(x),
     '¬': lambda x: not x,

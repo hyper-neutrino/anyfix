@@ -35,6 +35,7 @@ Anyfix is currently under heavy development so things may change at any time wit
 Codeblocks do not need the trailing '»'; that's only required for if `code` contains more than one token.  
 
 ## commands
+`¥`: Convert the top of the stack to a string, with a specified number of digits of precision  
 `©`: Copy top of stack to register  
 `¬`: Logical inverse  
 `®`: Push register  
