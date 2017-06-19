@@ -337,12 +337,11 @@ debug('TOKENS: %s' % str(tokens))
 
 interpreter = Interpreter(tokens)
 
+arguments = {}
+
 for index in range(2, len(sys.argv)):
     if sys.argv[index].startswith('@'):
-        pass
-        # key = sys.argv[index][1]
-        # if key in anyfix_globals.values:
-            # anyfix_globals.setGlobal(key, anyfix_globals.typers[key](sys.argv[index][2:]))
+            arguments[sys.argv[index][1]] = sys.argv[index][2:]
     else:
         interpreter.mem.append(eval(sys.argv[index]))
 
@@ -351,14 +350,4 @@ interpreter.mem = interpreter.mem[::-1]
 while interpreter.hasNext():
     interpreter.next()
 
-if '@list' in sys.argv or '@l' in sys.argv:
-    print('[', end = '')
-    for index in range(len(interpreter.mem)):
-        print(interpreter.mem[index], end = ('' if index == len(interpreter.mem) - 1 else ', '))
-    print(']')
-elif '@spaced' in sys.argv or '@s' in sys.argv:
-    print(' '.join(map(str, interpreter.mem)))
-elif '@newlines' in sys.argv or '@n' in sys.argv:
-    print('\n'.join(map(str, interpreter.mem)))
-else:
-    print(stringify(interpreter.mem))
+print(stringify(interpreter.mem, sigdig = (arguments['s'] if 's' in arguments else 0), chop = ('s' in arguments)))

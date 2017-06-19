@@ -50,6 +50,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `!`: Factorial / Pi Function  
 `"`: Duplicate top of stack  
 `#`: Parse to integer or float  
+`$`: Convert the top of the stack to a string  
 `&`: Logical AND  
 `*`: Exponentiation  
 `+`: Addition (Integer, String, List Element-wise, Integer into List on each element)  

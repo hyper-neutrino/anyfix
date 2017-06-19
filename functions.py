@@ -32,7 +32,7 @@ functions = {
     '!': lambda x: Pi(x),
     '"': lambda x: splat([clone(x), clone(x)], force = True),
     '#': lambda x: x if isNumber(x) else Number(x),
-    '$': lambda: 0,
+    '$': lambda x: stringify(x),
     '%': lambda x, y: y % x,
     '&': lambda x, y: True if y and x else False,
     '\'': lambda: 0,

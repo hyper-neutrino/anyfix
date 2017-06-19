@@ -260,11 +260,14 @@ def allSpans(pattern, string):
         match = re.search(pattern, string[deleted:])
     return spans
 
-def stringify(thing):
+def stringify(thing, sigdig = 0, chop = False):
     if isIterable(thing) and thing != str(thing):
-        return ''.join(map(stringify, thing))
+        return ''.join([stringify(subthing, sigdig = sigdig, chop = chop) for subthing in thing])
     else:
-        return str(thing)
+        if isNumber(thing) and chop:
+            return str(thing.evalf(sigdig))
+        else:
+            return str(thing)
 
 def blocks(array, length):
     result = []
