@@ -1,6 +1,4 @@
-from sympy import *
-import functools, operator, re, math
-
+'''
 class splat():
     def __init__(self, array, force = False):
         self.array = list(array)
@@ -160,7 +158,7 @@ def addition(x, y):
         for index in range(max(len(x), len(y))):
             if index < len(x):
                 if index < len(y):
-                    result.append(add(x[index], y[index]))
+                    result.append(addition(x[index], y[index]))
                 else:
                     result.append(x[index])
             else:
@@ -173,18 +171,43 @@ def addition(x, y):
     elif isIterable(y):
         return addition([x] * len(y), y)
 
-def repeatStr(string, times):
-    increment = Rational(1, len(string))
+def subtract(x, y):
+    if isNumber(x) and isNumber(y):
+        return x - y
+    elif type(x) == type('') and type(y) == type(''):
+        return ''.join(k for k in x if k not in y)
+    elif isIterable(x) and isIterable(y):
+        result = []
+        for index in range(max(len(x), len(y))):
+            if index < len(x):
+                if index < len(y):
+                    result.append(subtract(x[index], y[index]))
+                else:
+                    result.append(x[index])
+            else:
+                result.append(y[index])
+        return result
+    elif type(x) == type('') and isNumber(y):
+        return x[:-y]
+    elif type(y) == type('') and isNumber(x):
+        return y[:-x]
+    elif isIterable(x):
+        return subtract(x, [y] * len(x))
+    elif isIterable(y):
+        return subtract([x] * len(y), y)
+
+def repeatIter(iter, times):
+    increment = Rational(1, len(iter))
     times = floor(times / increment) * increment
     current = S.Zero
-    result = ''
+    result = []
     index = 0
     while current < times:
-        result += string[index]
+        result.append(iter[index])
         index += 1
-        index %= len(string)
+        index %= len(iter)
         current += increment
-    return result
+    return ''.join(result) if type(iter) == type('') else result
 
 def multiply(x, y):
     if isNumber(x) and isNumber(y):
@@ -208,6 +231,45 @@ def multiply(x, y):
         return multiply(x, [y] * len(x))
     elif isIterable(y):
         return multiply([x] * len(y), y)
+
+def divide(x, y):
+    return multiply(x, 1 / y)
+
+def intdivide(x, y):
+    return multiply(x, 1 // y)
+
+def requireSingularDyadicNumberOperator(function, x, y, default_x_absent, default_y_absent, string_transformer, string_function, num_preprocessor):
+    if isNumber(x) and isNumber(y):
+        return function(num_preprocessor(x), num_preprocessor(y)) if num_preprocessor else function(x, y)
+    elif type(x) == type('') and type(y) == type(''):
+        if string_transformer:
+            return requireSingularDyadicNumberOperator(function, string_transformer(x), string_transformer(y), default_x_absent, default_y_absent, string_transformer, string_function, num_preprocessor)
+        else:
+            return string_function(x, y)
+    elif isIterable(x) and isIterable(y):
+        result = []
+        for index in range(min(len(x), len(y))):
+            if index < len(x):
+                if index < len(y):
+                    result.append(function(x[index], y[index]))
+                else:
+                    result.append(default_y_absent(x))
+            else:
+                result.append(default_x_absent(y))
+        return result
+    elif isIterable(x):
+        return requireSingularDyadicNumberOperator(function, x, [y] * len(x), default_x_absent, default_y_absent, string_transformer, string_function, num_preprocessor)
+    elif isIterable(y):
+        return requireSingularDyadicNumberOperator(function, [x] * len(y), y, default_x_absent, default_y_absent, string_transformer, string_function, num_preprocessor)
+
+def exponentiate(x, y):
+    if isNumber(x) and isNumber(y):
+        return x ** y
+    else:
+        ax = x
+        for i in range(int(y)):
+            x *= ax
+        return x
 
 def clone(x):
     if isNumber(x):
@@ -260,12 +322,21 @@ def allSpans(pattern, string):
         match = re.search(pattern, string[deleted:])
     return spans
 
-def stringify(thing, sigdig = 0, chop = False):
+def stringify(thing, appx = False):
     if isIterable(thing) and thing != str(thing):
-        return ''.join([stringify(subthing, sigdig = sigdig, chop = chop) for subthing in thing])
+        return ''.join([stringify(subthing, appx = appx) for subthing in thing])
     else:
-        if isNumber(thing) and chop:
-            return str(thing.evalf(sigdig))
+        if isNumber(thing) and appx:
+            return re.sub('0+$', '', str(thing.evalf()))
+        else:
+            return str(thing)
+
+def listify(thing, appx = False):
+    if isIterable(thing) and thing != str(thing):
+        return '[' + ', '.join([listify(subthing, appx = appx) for subthing in thing]) + ']'
+    else:
+        if isNumber(thing) and appx:
+            return re.sub('0+$', '', str(thing.evalf()))
         else:
             return str(thing)
 
@@ -275,3 +346,67 @@ def blocks(array, length):
         result.append(array[:min(length, len(array))])
         array = array[min(length, len(array)):]
     return result
+
+def makeIterable(item, string = True):
+    if isIterable(item) and (string or type(item) == type([])):
+        return item
+    elif isNumber(item):
+        return list(range(int(item)))
+    else:
+        return list(item)
+
+def forceList(item):
+    if isIterable(item):
+        return list(item)
+    else:
+        return [item]
+
+def requireSingularMonadicNumberOperator(function, item, string_transformer, string_function, num_preprocessor, string = True):
+    if isIterable(item) and (string or type(item) != type('')):
+        return list(map(function, list(item)))
+    else:
+        return function(num_preprocessor(item) if num_preprocessor else item) if isNumber(item) else requireSingularMonadicNumberOperator(function, string_transformer(item), string_transformer, string_function, num_preprocessor, string = string) if string_transformer else string_function(item)
+
+def mapper(function):
+    return lambda x: list(map(function, x))
+
+def padleft(iterable, length, filler):
+    return repeatIter(filler, (length - len(iterable)) / len(filler)) + iterable
+
+def padright(iterable, length, filler):
+    return iterable + repeatIter(filler, (length - len(iterable)) / len(filler))
+
+def padcentre(iterable, length, filler):
+    return padleft(padright(iterable, int(len(iterable) + (length - len(iterable)) / 2), filler), int(length), filler)
+
+def padDefaultLeft(iterable, length):
+    return padleft(iterable, length, ' ' if type(iterable) == type('') else [S.Zero])
+
+def padDefaultRight(iterable, length):
+    return padright(iterable, length, ' ' if type(iterable) == type('') else [S.Zero])
+
+def padDefaultCentre(iterable, length):
+    return padcentre(iterable, length, ' ' if type(iterable) == type('') else [S.Zero])
+
+def zip(array):
+    result = []
+    width = max(map(len, array))
+    for index in range(width):
+        result.append([])
+        for j in range(len(array)):
+            if index < len(array[j]):
+                result[-1].append(array[j][index])
+    return result
+
+def padzip(array, filler):
+    result = []
+    width = max(map(len, array))
+    for index in range(width):
+        result.append([])
+        for j in range(len(array)):
+            if index < len(array[j]):
+                result[-1].append(array[j][index])
+            else:
+                result[-1].append(filler)
+    return result
+'''

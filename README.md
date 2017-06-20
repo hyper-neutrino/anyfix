@@ -41,6 +41,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `®`: Push register  
 `½`: Square Root  
 `Æ½`: Integer Square Root  
+`Ø`: Center a list or string to a specified length using `0` for padding lists and `' '` for strings  
 `Ç`: Copy `1-from-top` to top  
 `Ð`: Triplicate top of stack  
 `×`: Multiply  
@@ -48,6 +49,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ı`: Complex Number  
 `ȷ`: `1-from-top * 10 ** top` (exp-10)  
 `÷`: Arbitrary-precision Division  
+`ø`: Center a list or string to a specified length padding with the specified item. If a list or multi-character string is given as a padding element, it may use a fractional portion of it  
 `!`: Factorial / Pi Function  
 `"`: Duplicate top of stack  
 `#`: Parse to integer or float  
@@ -76,12 +78,19 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `R`: Range `[1..x]`  
 `S`: Sum  
 `U`: Reverses the top if it can be iterated over; otherwise, the whole stack  
-`X`: Expand the top of the stack to individual elements; does nothing if the top is not iterable  
+`W`: Wrap; `x -> [x]`  
+`X`: Expand the top of the stack to individual elements; does nothing if the top is not a list or string  
+`Z`: Zip; transform of a list of lists or strings  
 `_`: Subtraction; `1-from-top - top`  
 `b`: Convert from number to digits in specified base  
+`p`: Pad on the left side to match a certain length using `0` for lists and `' '` for strings  
+`q`: Pad on the right side to match a certain length using `0` for lists and `' '` for strings  
 `s`: Split list into sublists of specified length  
 `x`: Repeat List Element-wise (`[1 2 3] x 4` becomes `[1 1 1 1 2 2 2 2 3 3 3 3]`)  
+`z`: Zip; transform of a list of lists or strings using a specified filled if the matrix is not rectangular  
+`{`: Pad on the left side to match a certain length using the specified item. If a list or multi-character string is given as a padding element, it may use a fractional portion of it  
 `|`: Logical OR  
+'}': Pad on the right side to match a certain length using the specified item. If a list or multi-character string is given as a padding element, it may use a fractional portion of it  
 `¹`: Identity (returns the argument)  
 `²`: Squared  
 `³`: 16  
@@ -125,6 +134,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ḅ`: Convert list to number using specified base  
 `ġ`: Greatest Common Divisor  
 `ŀ`: Lowest Common Multiple  
+`ẋ`: Repeat iterable overall; `[1 2 3] ẋ 4` becomes `[1 2 3 1 2 3 1 2 3 1 2 3]`
 `«`: Swap top two elements  
 `‘`: Increment  
 `’`: Decrement  
