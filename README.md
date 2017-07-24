@@ -134,7 +134,7 @@ Codeblocks do not need the trailing '»'; that's only required for if `code` con
 `ḅ`: Convert list to number using specified base  
 `ġ`: Greatest Common Divisor  
 `ŀ`: Lowest Common Multiple  
-`ẋ`: Repeat iterable overall; `[1 2 3] ẋ 4` becomes `[1 2 3 1 2 3 1 2 3 1 2 3]`
+`ẋ`: Repeat iterable overall; `[1 2 3] ẋ 4` becomes `[1 2 3 1 2 3 1 2 3 1 2 3]`  
 `«`: Swap top two elements  
 `‘`: Increment  
 `’`: Decrement  
